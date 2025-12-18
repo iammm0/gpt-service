@@ -1,0 +1,6 @@
+实现配置管理系统
+
+- 实现src/config.py，支持环境变量和YAML配置
+- 支持开发/生产环境自动切换
+- 添加config/dev.yaml, config/prod.yaml, config/models.yaml
+

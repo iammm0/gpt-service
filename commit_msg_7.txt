@@ -1,0 +1,5 @@
+实现模型评估模块
+
+- 实现src/evaluator.py
+- 支持多种评估指标：perplexity, exact_match, BLEU, ROUGE
+

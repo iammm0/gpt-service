@@ -1,0 +1,5 @@
+添加工具脚本
+
+- 添加scripts/train_lora.py训练脚本
+- 添加scripts/evaluate_model.py评估脚本
+
