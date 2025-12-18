@@ -1,0 +1,33 @@
+# Web框架
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# 模型和训练
+torch>=2.0.0
+transformers>=4.35.0
+accelerate>=0.24.0
+peft>=0.6.0
+datasets>=2.14.0
+sentencepiece>=0.1.99
+
+# Ollama代理
+aiohttp>=3.9.0
+httpx>=0.25.0
+
+# 配置和日志
+pyyaml>=6.0.1
+python-json-logger>=2.0.7
+
+# 工具库
+numpy>=1.24.0
+tqdm>=4.66.0
+
+# 可选依赖
+redis>=5.0.0  # 用于缓存（可选）
+
+# 开发依赖（可选）
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
