@@ -13,7 +13,14 @@ RUN apt-get update && apt-get install -y \
 # 复制依赖文件
 COPY requirements.txt .
 
-# 安装Python依赖
+# 先安装PyTorch GPU版本（CUDA 12.4）
+# 注意：PyTorch GPU版本需要从PyTorch官网安装
+# 需要至少 2.6 版本以满足 transformers 的安全要求（CVE-2025-32434）
+# 使用 --extra-index-url 而不是 --index-url，避免依赖包元数据冲突
+RUN pip install --no-cache-dir --user "torch>=2.6.0" torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu124
+
+# 安装其他Python依赖
+# pip会检测到torch已安装并满足版本要求，不会重新安装
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # 运行阶段

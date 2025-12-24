@@ -24,10 +24,8 @@ logs/
 *.log
 
 # Models
-models/base/
-models/lora/
-models/checkpoints/
-models/cache/
+models/
+!models/.gitkeep
 
 # Environment
 .env
@@ -41,4 +39,3 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
-

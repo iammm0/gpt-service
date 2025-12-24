@@ -15,6 +15,7 @@ from transformers import (
     AutoModelForCausalLM,
     TextIteratorStreamer,
     GenerationConfig,
+    AutoConfig,
 )
 from peft import PeftModel, LoraConfig, get_peft_model, TaskType
 
@@ -22,6 +23,12 @@ from src.config import get_config, ServiceConfig
 from src.logger import setup_logger
 
 logger = setup_logger(__name__)
+
+# 向量模型相关的关键词（用于屏蔽）
+VECTOR_MODEL_KEYWORDS = [
+    "embed", "embedding", "vector", "sentence", "retrieval", 
+    "similarity", "semantic", "encoder", "bi-encoder", "cross-encoder"
+]
 
 
 class ModelType(str, Enum):
@@ -107,6 +114,72 @@ class ModelManager:
         else:
             return torch.float32
     
+    def _is_vector_model(self, model_name: str, model_path: Optional[str] = None) -> bool:
+        """
+        检查是否为向量/embedding模型
+        
+        Args:
+            model_name: 模型名称
+            model_path: 模型路径
+            
+        Returns:
+            如果是向量模型返回True，否则返回False
+        """
+        # 检查模型名称中是否包含明确的向量模型关键词
+        model_name_lower = model_name.lower()
+        # 只检查明确的向量模型关键词，排除可能用于因果语言模型的模型
+        explicit_vector_keywords = [
+            "embedding", "vector", "sentence-transformer", "sentence_transformer",
+            "bi-encoder", "cross-encoder", "retrieval", "semantic-search"
+        ]
+        for keyword in explicit_vector_keywords:
+            if keyword in model_name_lower:
+                logger.warning(f"检测到向量模型关键词 '{keyword}' 在模型名称中: {model_name}")
+                return True
+        
+        # 检查模型路径中是否包含明确的向量模型关键词
+        if model_path:
+            model_path_lower = str(model_path).lower()
+            for keyword in explicit_vector_keywords:
+                if keyword in model_path_lower:
+                    logger.warning(f"检测到向量模型关键词 '{keyword}' 在模型路径中: {model_path}")
+                    return True
+        
+        # 尝试加载模型配置检查架构类型
+        try:
+            config_path = model_path or model_name
+            config = AutoConfig.from_pretrained(
+                config_path,
+                trust_remote_code=True
+            )
+            
+            # 检查模型架构类型
+            architectures = getattr(config, 'architectures', [])
+            
+            # 检查是否为明确的embedding/向量检索架构（排除因果语言模型）
+            explicit_embedding_architectures = [
+                'sentence-transformer', 'sentence_transformer', 'bi-encoder', 
+                'cross-encoder', 'retrieval', 'embedding'
+            ]
+            
+            for arch in architectures:
+                arch_lower = str(arch).lower()
+                # 如果架构明确是因果语言模型，则允许
+                if 'causal' in arch_lower or 'generation' in arch_lower or 'gpt' in arch_lower:
+                    return False
+                
+                # 检查是否为明确的embedding架构
+                for emb_arch in explicit_embedding_architectures:
+                    if emb_arch in arch_lower:
+                        logger.warning(f"检测到向量模型架构: {arch}")
+                        return True
+                    
+        except Exception as e:
+            # 如果无法加载配置，记录调试信息但不阻止加载（可能是网络问题等）
+            logger.debug(f"无法检查模型配置: {str(e)}")
+        
+        return False
+    
     def load_model(
         self,
         model_name: str,
@@ -131,6 +204,12 @@ class ModelManager:
             return self.models[model_name]
         
         logger.info(f"开始加载模型: {model_name}")
+        
+        # 检查是否为向量模型，如果是则拒绝加载
+        if self._is_vector_model(model_name, model_path):
+            error_msg = f"向量/embedding模型已被屏蔽，不允许加载: {model_name}"
+            logger.error(error_msg)
+            raise ValueError(error_msg)
         
         try:
             # 加载tokenizer

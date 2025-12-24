@@ -1,0 +1,26 @@
+代码重构：模块化架构优化
+
+主要更改：
+1. 重构项目结构，将main.py中的代码拆分到独立模块
+   - 新增src/app.py作为FastAPI应用入口
+   - 新增src/routes/目录，包含各个路由模块
+   - 新增src/schemas.py定义数据模型
+   - 新增src/dependencies.py管理依赖注入
+
+2. 优化模型管理
+   - 增强src/model_manager.py，添加模型加载和管理功能
+   - 支持多个预训练模型（macbert, roberta-base, roberta-large）
+
+3. 配置和日志优化
+   - 更新src/config.py配置管理
+   - 优化src/logger.py日志设置
+   - 更新.gitignore，确保models目录不会被提交
+
+4. Docker配置更新
+   - 更新Dockerfile以适配新的项目结构
+
+5. 清理临时文件
+   - 删除不再需要的临时txt和md文件
+
+此次重构提升了代码的可维护性和可扩展性，使项目结构更加清晰。
+注意：models目录包含大型模型文件，已通过.gitignore排除，不会提交到仓库。

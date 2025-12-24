@@ -6,11 +6,10 @@
 
 import logging
 import sys
-from pathlib import Path
-from logging.handlers import RotatingFileHandler
-from typing import Optional
-import json
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
+from typing import Optional, Any
 
 try:
     from pythonjsonlogger import jsonlogger

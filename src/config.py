@@ -131,6 +131,7 @@ class ServiceConfig(BaseSettings):
 
 # 全局配置实例
 _config: Optional[ServiceConfig] = None
+_models_config: Optional[Dict[str, Any]] = None
 
 
 def load_yaml_config(config_path: Path) -> Dict[str, Any]:
@@ -174,14 +175,14 @@ def get_config() -> ServiceConfig:
     # 加载YAML配置
     yaml_config = load_yaml_config(env_config_path)
     
-    # 加载模型配置
+    # 加载模型配置（单独存储，不作为 ServiceConfig 的一部分）
     models_config_path = config_dir / "models.yaml"
-    models_config = load_yaml_config(models_config_path)
-    if models_config:
-        yaml_config["models_config"] = models_config
+    global _models_config
+    _models_config = load_yaml_config(models_config_path)
     
     # 创建配置实例
     # 首先从环境变量加载，然后用YAML配置覆盖
+    # 注意：models_config 不包含在 ServiceConfig 中，需要单独获取
     _config = ServiceConfig(**yaml_config)
     
     # 确保目录存在
@@ -207,9 +208,28 @@ def _ensure_directories():
         Path(dir_path).mkdir(parents=True, exist_ok=True)
 
 
+def get_models_config() -> Dict[str, Any]:
+    """
+    获取模型配置（从 models.yaml 加载）
+    
+    Returns:
+        模型配置字典
+    """
+    global _models_config
+    
+    if _models_config is not None:
+        return _models_config
+    
+    # 如果还未加载，先加载服务配置（会同时加载模型配置）
+    get_config()
+    
+    return _models_config or {}
+
+
 def reload_config():
     """重新加载配置"""
-    global _config
+    global _config, _models_config
     _config = None
+    _models_config = None
     return get_config()
 

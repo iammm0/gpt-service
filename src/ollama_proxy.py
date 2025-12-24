@@ -13,7 +13,6 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 
-import aiohttp
 from aiohttp import ClientSession, ClientTimeout
 
 from src.config import get_config, ServiceConfig

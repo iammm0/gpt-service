@@ -1,6 +1,0 @@
-项目初始化和基础配置
-
-- 添加项目基础文件：README.md, requirements.txt, .gitignore, .dockerignore
-- 配置开发和生产环境配置文件
-- 添加Docker相关文件
-
